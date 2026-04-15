@@ -20,30 +20,32 @@ public class EventService {
 
     public EventResponseDTO createEvent(EventRequestDTO request) {
 
-    Event event = new Event();
+        Event event = new Event();
 
-    event.setName(request.name());
-    event.setLocation(request.location());
-    event.setDescription(request.description());
-    event.setImageUrl(request.imageUrl());
-    event.setPrice(request.price());
-    event.setAvailableTickets(request.availableTickets());
+        event.setName(request.name());
+        event.setLocation(request.location());
+        event.setDescription(request.description());
+        event.setImageUrl(request.imageUrl());
+        event.setPrice(request.price());
+        event.setAvailableTickets(request.availableTickets());
+        event.setEventDate(request.eventDate());
 
-    event.setStatus(EventStatus.PENDING);
+        event.setStatus(EventStatus.PENDING);
 
-    Event saved = repository.save(event);
+        Event saved = repository.save(event);
 
-    return new EventResponseDTO(
-        saved.getId(),
-        saved.getName(),
-        saved.getLocation(),
-        saved.getDescription(),
-        saved.getImageUrl(),
-        saved.getPrice(),
-        saved.getAvailableTickets(),
-        saved.getStatus().name()
-    );
-}
+        return new EventResponseDTO(
+            saved.getId(),
+            saved.getName(),
+            saved.getLocation(),
+            saved.getDescription(),
+            saved.getImageUrl(),
+            saved.getPrice(),
+            saved.getAvailableTickets(),
+            saved.getStatus().name(),
+            saved.getEventDate()
+        );
+    }
 
     public List<Event> findAll() {
         return repository.findAll();
