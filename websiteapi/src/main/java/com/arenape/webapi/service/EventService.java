@@ -4,9 +4,13 @@ import com.arenape.webapi.dto.request.EventRequestDTO;
 import com.arenape.webapi.dto.response.EventResponseDTO;
 import com.arenape.webapi.entity.Event;
 import com.arenape.webapi.entity.enums.EventStatus;
+import com.arenape.webapi.exception.BusinessException;
+import com.arenape.webapi.exception.ResourceNotFoundException;
 import com.arenape.webapi.repository.EventRepository;
+
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,8 +23,43 @@ public class EventService {
     }
 
     public EventResponseDTO create(EventRequestDTO request) {
+        if (request.eventDate().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("A data do evento deve ser no futuro");
+        }
 
         Event event = new Event();
+        event.setName(request.name());
+        event.setLocation(request.location());
+        event.setDescription(request.description());
+        event.setImageUrl(request.imageUrl());
+        event.setPrice(request.price());
+        event.setAvailableTickets(request.availableTickets());
+        event.setEventDate(request.eventDate());
+        event.setStatus(EventStatus.PENDING);
+
+        return toDTO(repository.save(event));
+    }
+
+    public List<EventResponseDTO> findAll() {
+        return repository.findAll().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public EventResponseDTO findById(Long id) {
+        return toDTO(findEventById(id));
+    }
+
+    public EventResponseDTO update(Long id, EventRequestDTO request) {
+        Event event = findEventById(id);
+
+        if (event.getStatus() == EventStatus.CANCELLED) {
+            throw new BusinessException("Não é possível editar um evento cancelado");
+        }
+
+        if (request.eventDate().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("A data do evento deve ser no futuro");
+        }
 
         event.setName(request.name());
         event.setLocation(request.location());
@@ -30,45 +69,27 @@ public class EventService {
         event.setAvailableTickets(request.availableTickets());
         event.setEventDate(request.eventDate());
 
-        event.setStatus(EventStatus.PENDING);
-
-        Event saved = repository.save(event);
-
-        return new EventResponseDTO(
-                saved.getId(),
-                saved.getName(),
-                saved.getLocation(),
-                saved.getDescription(),
-                saved.getImageUrl(),
-                saved.getPrice(),
-                saved.getAvailableTickets(),
-                saved.getStatus().name(),
-                saved.getEventDate());
+        return toDTO(repository.save(event));
     }
 
-    public List<EventResponseDTO> findAll() {
+    public void delete(Long id) {
+        Event event = findEventById(id);
 
-        List<Event> events = repository.findAll();
+        if (event.getStatus() == EventStatus.CONFIRMED) {
+            throw new BusinessException("Não é possível excluir um evento confirmado");
+        }
 
-        return events.stream()
-                .map(event -> new EventResponseDTO(
-                        event.getId(),
-                        event.getName(),
-                        event.getLocation(),
-                        event.getDescription(),
-                        event.getImageUrl(),
-                        event.getPrice(),
-                        event.getAvailableTickets(),
-                        event.getStatus().name(),
-                        event.getEventDate()))
-                .toList();
+        repository.delete(event);
     }
 
-    public EventResponseDTO findById(Long id) {
+    // ─── Helpers ────────────────────────────────────────────────────────────────
 
-        Event event = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+    private Event findEventById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado com id: " + id));
+    }
 
+    private EventResponseDTO toDTO(Event event) {
         return new EventResponseDTO(
                 event.getId(),
                 event.getName(),
@@ -79,42 +100,5 @@ public class EventService {
                 event.getAvailableTickets(),
                 event.getStatus().name(),
                 event.getEventDate());
-    }
-
-    public EventResponseDTO update(Long id, EventRequestDTO request) {
-
-        Event event = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-
-        event.setName(request.name());
-        event.setLocation(request.location());
-        event.setDescription(request.description());
-        event.setImageUrl(request.imageUrl());
-        event.setPrice(request.price());
-        event.setAvailableTickets(request.availableTickets());
-        event.setEventDate(request.eventDate());
-
-        // NÃO mexe no id
-        // NÃO mexe no status (se quiser manter regra do backend)
-
-        Event updated = repository.save(event);
-
-        return new EventResponseDTO(
-                updated.getId(),
-                updated.getName(),
-                updated.getLocation(),
-                updated.getDescription(),
-                updated.getImageUrl(),
-                updated.getPrice(),
-                updated.getAvailableTickets(),
-                updated.getStatus().name(),
-                updated.getEventDate());
-    }
-
-    public void delete(Long id) {
-        Event event = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-
-        repository.delete(event);
     }
 }
