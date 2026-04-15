@@ -18,7 +18,7 @@ public class EventService {
         this.repository = repository;
     }
 
-    public EventResponseDTO create(EventRequestDTO request) {
+    public EventResponseDTO createEvent(EventRequestDTO request) {
 
     Event event = new Event();
 
