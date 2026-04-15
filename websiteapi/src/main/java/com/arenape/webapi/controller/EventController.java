@@ -2,8 +2,9 @@ package com.arenape.webapi.controller;
 
 import com.arenape.webapi.dto.request.EventRequestDTO;
 import com.arenape.webapi.dto.response.EventResponseDTO;
-import com.arenape.webapi.entity.Event;
 import com.arenape.webapi.service.EventService;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,26 +21,28 @@ public class EventController {
 
     @PostMapping
     public EventResponseDTO createEvent(@RequestBody EventRequestDTO request) {
-        return service.createEvent(request);
+        return service.create(request);
     }
 
     @GetMapping
-    public List<Event> findAll() {
+    public List<EventResponseDTO> findAll() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public Event findById(@PathVariable Long id) {
+    public EventResponseDTO findById(@PathVariable Long id) {
         return service.findById(id);
     }
 
     @PutMapping("/{id}")
-    public Event update(@PathVariable Long id, @RequestBody Event event) {
-        return service.update(id, event);
+    public EventResponseDTO update(@PathVariable Long id,
+            @RequestBody EventRequestDTO request) {
+        return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

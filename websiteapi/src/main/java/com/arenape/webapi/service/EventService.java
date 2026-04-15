@@ -18,7 +18,7 @@ public class EventService {
         this.repository = repository;
     }
 
-    public EventResponseDTO createEvent(EventRequestDTO request) {
+    public EventResponseDTO create(EventRequestDTO request) {
 
         Event event = new Event();
 
@@ -35,39 +35,86 @@ public class EventService {
         Event saved = repository.save(event);
 
         return new EventResponseDTO(
-            saved.getId(),
-            saved.getName(),
-            saved.getLocation(),
-            saved.getDescription(),
-            saved.getImageUrl(),
-            saved.getPrice(),
-            saved.getAvailableTickets(),
-            saved.getStatus().name(),
-            saved.getEventDate()
-        );
+                saved.getId(),
+                saved.getName(),
+                saved.getLocation(),
+                saved.getDescription(),
+                saved.getImageUrl(),
+                saved.getPrice(),
+                saved.getAvailableTickets(),
+                saved.getStatus().name(),
+                saved.getEventDate());
     }
 
-    public List<Event> findAll() {
-        return repository.findAll();
+    public List<EventResponseDTO> findAll() {
+
+        List<Event> events = repository.findAll();
+
+        return events.stream()
+                .map(event -> new EventResponseDTO(
+                        event.getId(),
+                        event.getName(),
+                        event.getLocation(),
+                        event.getDescription(),
+                        event.getImageUrl(),
+                        event.getPrice(),
+                        event.getAvailableTickets(),
+                        event.getStatus().name(),
+                        event.getEventDate()))
+                .toList();
     }
 
-    public Event findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+    public EventResponseDTO findById(Long id) {
+
+        Event event = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        return new EventResponseDTO(
+                event.getId(),
+                event.getName(),
+                event.getLocation(),
+                event.getDescription(),
+                event.getImageUrl(),
+                event.getPrice(),
+                event.getAvailableTickets(),
+                event.getStatus().name(),
+                event.getEventDate());
     }
 
-    public Event update(Long id, Event event) {
-        Event existing = findById(id);
+    public EventResponseDTO update(Long id, EventRequestDTO request) {
 
-        existing.setName(event.getName());
-        existing.setLocation(event.getLocation());
-        existing.setPrice(event.getPrice());
-        existing.setAvailableTickets(event.getAvailableTickets());
+        Event event = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        return repository.save(existing);
+        event.setName(request.name());
+        event.setLocation(request.location());
+        event.setDescription(request.description());
+        event.setImageUrl(request.imageUrl());
+        event.setPrice(request.price());
+        event.setAvailableTickets(request.availableTickets());
+        event.setEventDate(request.eventDate());
+
+        // NÃO mexe no id
+        // NÃO mexe no status (se quiser manter regra do backend)
+
+        Event updated = repository.save(event);
+
+        return new EventResponseDTO(
+                updated.getId(),
+                updated.getName(),
+                updated.getLocation(),
+                updated.getDescription(),
+                updated.getImageUrl(),
+                updated.getPrice(),
+                updated.getAvailableTickets(),
+                updated.getStatus().name(),
+                updated.getEventDate());
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        Event event = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        repository.delete(event);
     }
 }
