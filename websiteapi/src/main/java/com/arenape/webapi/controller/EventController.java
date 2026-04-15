@@ -1,5 +1,7 @@
 package com.arenape.webapi.controller;
 
+import com.arenape.webapi.dto.request.EventRequestDTO;
+import com.arenape.webapi.dto.response.EventResponseDTO;
 import com.arenape.webapi.entity.Event;
 import com.arenape.webapi.service.EventService;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,8 @@ public class EventController {
     }
 
     @PostMapping
-    public Event create(@RequestBody Event event) {
-        return service.create(event);
+    public EventResponseDTO create(@RequestBody EventRequestDTO request) {
+        return service.create(request);
     }
 
     @GetMapping

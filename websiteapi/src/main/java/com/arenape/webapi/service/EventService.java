@@ -1,6 +1,9 @@
 package com.arenape.webapi.service;
 
+import com.arenape.webapi.dto.request.EventRequestDTO;
+import com.arenape.webapi.dto.response.EventResponseDTO;
 import com.arenape.webapi.entity.Event;
+import com.arenape.webapi.entity.enums.EventStatus;
 import com.arenape.webapi.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +18,32 @@ public class EventService {
         this.repository = repository;
     }
 
-    public Event create(Event event) {
-        return repository.save(event);
-    }
+    public EventResponseDTO create(EventRequestDTO request) {
+
+    Event event = new Event();
+
+    event.setName(request.name());
+    event.setLocation(request.location());
+    event.setDescription(request.description());
+    event.setImageUrl(request.imageUrl());
+    event.setPrice(request.price());
+    event.setAvailableTickets(request.availableTickets());
+
+    event.setStatus(EventStatus.PENDING);
+
+    Event saved = repository.save(event);
+
+    return new EventResponseDTO(
+        saved.getId(),
+        saved.getName(),
+        saved.getLocation(),
+        saved.getDescription(),
+        saved.getImageUrl(),
+        saved.getPrice(),
+        saved.getAvailableTickets(),
+        saved.getStatus().name()
+    );
+}
 
     public List<Event> findAll() {
         return repository.findAll();
