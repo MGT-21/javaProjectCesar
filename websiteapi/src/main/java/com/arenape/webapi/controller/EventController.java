@@ -19,7 +19,7 @@ public class EventController {
     }
 
     @PostMapping
-    public EventResponseDTO create(@RequestBody EventRequestDTO request) {
+    public EventResponseDTO createEvent(@RequestBody EventRequestDTO request) {
         return service.create(request);
     }
 
