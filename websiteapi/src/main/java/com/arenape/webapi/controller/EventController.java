@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
  
 import java.util.List;
  
@@ -24,6 +25,7 @@ public class EventController {
  
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = "bearerAuth")
     public EventResponseDTO createEvent(@RequestBody @Valid EventRequestDTO request) {
         return service.create(request);
     }
@@ -39,6 +41,7 @@ public class EventController {
     }
  
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public EventResponseDTO update(
             @PathVariable Long id,
             @RequestBody @Valid EventRequestDTO request) {
@@ -46,6 +49,7 @@ public class EventController {
     }
  
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

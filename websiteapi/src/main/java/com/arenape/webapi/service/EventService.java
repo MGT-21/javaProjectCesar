@@ -23,9 +23,6 @@ public class EventService {
     }
 
     public EventResponseDTO create(EventRequestDTO request) {
-        if (request.eventDate().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("A data do evento deve ser no futuro");
-        }
 
         Event event = new Event();
         event.setName(request.name());
